@@ -4,7 +4,7 @@ gB.style.width = "100wh";
 gB.style.justifyContent = "center";
 
 const cell = document.querySelectorAll(".cell");
-for(let i = 0; i<cell.length; i++){    
+for(let i = 0; i < cell.length; i++){    
     cell[i].style.border = "2px solid black";
 }
 const rB = document.querySelector("#restartButton");
@@ -15,64 +15,28 @@ const undo = document.querySelector("#undoButton");
 undo.style.marginTop = "20px";
 undo.style.padding = "5px";
 
-function won(celli, curr){
-    let checks = false;
-
-    if(celli[0].textContent == curr && celli[4].textContent == curr){
-        if(celli[4].textContent == curr && celli[8].textContent == curr){
-            checks = true;
+function won(celli, curr) {
+    // Check rows
+    for (let i = 0; i < 9; i += 3) {
+        if (celli[i].textContent == curr && celli[i+1].textContent == curr && celli[i+2].textContent == curr) {
+            return true;
         }
     }
-    else if(celli[2].textContent == curr && celli[4].textContent == curr){
-        if(celli[4].textContent == curr && celli[6].textContent == curr){
-            checks = true;
+    // Check columns
+    for (let i = 0; i < 3; i++) {
+        if (celli[i].textContent == curr && celli[i+3].textContent == curr && celli[i+6].textContent == curr) {
+            return true;
         }
     }
-    else if(celli[0].textContent == curr && celli[3].textContent == curr){
-        if(celli[3].textContent == curr && celli[6].textContent == curr){
-            checks = true;
-        }
+    // Check diagonals
+    if (celli[0].textContent == curr && celli[4].textContent == curr && celli[8].textContent == curr) {
+        return true;
     }
-    else if(celli[1].textContent == curr && celli[4].textContent == curr){
-        if(celli[4].textContent == curr && celli[7].textContent == curr){
-            checks = true;
-        }
+    if (celli[2].textContent == curr && celli[4].textContent == curr && celli[6].textContent == curr) {
+        return true;
     }
-    else if(celli[2].textContent == curr && celli[5].textContent == curr){
-        if(celli[5].textContent == curr && celli[8].textContent == curr){
-            checks = true;
-        }
-    }
-
-    for(let i=0; i<2; i++){
-        let c = 0;
-        if(celli[i].textContent == curr && celli[i+1].textContent == curr){
-            c += 1
-        }
-        if(c == 3){
-            checks = true;
-        }
-    }
-    for(let i=3; i<5; i++){
-        let c = 0;
-        if(celli[i].textContent == curr && celli[i+1].textContent == curr){
-            c += 1
-        }
-        if(c == 3){
-            checks = true;
-        }
-    }
-    for(let i=6; i<8; i++){
-        let c = 0;
-        if(celli[i].textContent == curr && celli[i+1].textContent == curr){
-            c += 1
-        }
-        if(c == 3){
-            checks = true;
-        }
-    }
-return checks
-} 
+    return false;
+}
 
 function isBoardFull() {
     for (let i = 0; i < cell.length; i++) {
@@ -82,66 +46,60 @@ function isBoardFull() {
     }
     return true;
 }
-function restart() {
-  cell.forEach((celli) => {
-    celli.textContent = "";
-  })};
 
+function restart() {
+    cell.forEach((celli) => {
+        celli.textContent = "";
+    });
+    draw = false;
+    turn_of_o = true;
+    moves = [];
+}
 
 let moves = [];
-
-
 let turn_of_o = true;
 let draw = false;
-cell.forEach((celli)=>{
-    celli.addEventListener("click",function clicked(){
+
+cell.forEach((celli) => {
+    celli.addEventListener("click", function clicked() {
         const cell_idx = celli.getAttribute("data-cell-index");
-        if(celli.textContent || draw){
-            return
-        }
-        else if(turn_of_o){
+        if (celli.textContent || draw) {
+            return;
+        } else if (turn_of_o) {
             celli.textContent = "X";
-            
             turn_of_o = false;
-            if(won(cell, "X")){
+            if (won(cell, "X")) {
                 draw = false;
                 alert("Player1 wins!");
             }
             if (!won(cell, "X") && !won(cell, "O") && isBoardFull()) {
-            draw = true;
-            alert("it's a draw");
-
-        }
-        
-        moves.push(cell_idx);
-        
-        }
-        else if(turn_of_o == false){
+                draw = true;
+                alert("It's a draw");
+            }
+            moves.push(cell_idx);
+        } else {
             celli.textContent = "O";
-
-            
             turn_of_o = true;
-            if(won(cell, "O")){
+            if (won(cell, "O")) {
                 draw = false;
                 alert("Player2 wins!");
             }
             if (!won(cell, "X") && !won(cell, "O") && isBoardFull()) {
-            draw = true;
-            alert("it's a draw");
+                draw = true;
+                alert("It's a draw");
+            }
+            moves.push(cell_idx);
         }
-        moves.push(cell_idx);
-        }
-        
-    })
+    });
 });
 
 const restartButton = document.querySelector("#restartButton");
 restartButton.addEventListener("click", function () {
-  restart();
+    restart();
 });
 
-undo.addEventListener("click", ()=>{
+undo.addEventListener("click", () => {
     let last_move = moves.pop();
     document.querySelector(`[data-cell-index="${last_move}"]`).textContent = "";
     turn_of_o = !turn_of_o;
-})
+});
